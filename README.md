@@ -101,41 +101,39 @@ The first response may be slow while the model warms up. If you see `No reply fr
 
 ## Web Interface
 
-The OpenClaw Gateway Dashboard is available at `http://127.0.0.1:18789/` when the port forward is running. It provides a browser-based interface for monitoring sessions, agents, channels, usage, and logs.
+The OpenClaw Gateway Dashboard provides a browser-based interface for monitoring
+sessions, agents, channels, usage, and logs.
 
-The port forward is started automatically during installation. To start it manually:
+**Starting the dashboard:**
+
+1. Start the port forward (if not already running):
 ```bash
 openshell forward start 18789 <sandbox-name> --background
 ```
 
-To stop it:
+2. Get the dashboard URL with authentication token. Connect to the sandbox:
+```bash
+nemoclaw <sandbox-name> connect
+```
+Then inside the sandbox:
+```bash
+openclaw dashboard --no-open
+```
+This prints the full URL including the authentication token. Copy it and open it in a browser.
+
+3. To stop the port forward:
 ```bash
 openshell forward stop 18789 <sandbox-name>
 ```
 
 To find your sandbox name: `openshell sandbox list`
 
-**Authentication (as of March 2026):** Due to a known bug in the current OpenClaw
-version, the dashboard requires the gateway token passed directly in the URL.
-
-The gateway token is a secret string generated during NemoClaw onboarding that
-authenticates the browser to the OpenClaw gateway WebSocket. It is stored in
-`openclaw.json` inside the sandbox and is unique to your sandbox instance.
-
-To retrieve it, connect to the sandbox:
-```bash
-nemoclaw <sandbox-name> connect
-```
-Then inside the sandbox:
-```bash
-openclaw config get gateway.auth.token
-```
-Open the dashboard with the token in the URL:
-```
-http://127.0.0.1:18789/?token=<token-value>
-```
-The token persists across sandbox restarts — you only need to retrieve it once.
-This workaround will not be needed once the OpenClaw authentication bug is fixed.
+**Note (as of March 2026):** Due to a known OpenClaw bug, the dashboard does not
+connect when navigating directly to `http://127.0.0.1:18789/` — the tokenized URL
+from `openclaw dashboard --no-open` is required. Additionally, the gateway token
+is currently displayed in plaintext in the dashboard Overview panel — be aware of
+this if sharing your screen. Both issues are expected to be fixed in a future
+OpenClaw release.
 
 ## Inference Modes
 
@@ -174,7 +172,7 @@ Remove nvm and Node.js:
 
 **Plugin banner** — The NemoClaw plugin inside the sandbox always displays `Endpoint: build.nvidia.com`. This is cosmetic. Inference is routed locally through the OpenShell gateway to the vLLM server.
 
-**Web dashboard authentication (as of March 2026)** — The Control UI at `http://127.0.0.1:18789/` requires the gateway token in the URL due to a known OpenClaw authentication bug. See the Web Interface section above for the workaround.
+**Web dashboard (as of March 2026)** — Direct navigation to `http://127.0.0.1:18789/` does not connect. Use `openclaw dashboard --no-open` inside the sandbox to get the correct tokenized URL. The gateway token is also currently displayed in plaintext in the dashboard Overview panel. Both are known OpenClaw bugs expected to be fixed in a future release.
 
 **First-call latency** — The first inference request after starting the server may time out while the model loads into memory. This is expected — wait a moment and retry.
 
